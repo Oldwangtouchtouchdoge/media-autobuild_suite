@@ -16,6 +16,7 @@ update_suite.sh
 !build/*.sh
 !build/patches/
 !build/extras/
+!build/media-autobuild_suite.ini
 /build/post_suite.sh
 
 ## VS Code

@@ -1,0 +1,35 @@
+name: Build
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    env:
+      # Filepath need to be short
+      CUSTOM_WORKSPACE_PATH: C:\a
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Move folder to make filepath shorter and setup msys2
+        shell: powershell
+        run: |
+          if(Test-Path -Path $env:CUSTOM_WORKSPACE_PATH) { rm -Recurse -Force $env:CUSTOM_WORKSPACE_PATH }
+          cp -Recurse $env:GITHUB_WORKSPACE $env:CUSTOM_WORKSPACE_PATH
+          New-Item -ItemType SymbolicLink -Path $env:CUSTOM_WORKSPACE_PATH/msys64 -Target C:\msys64
+
+      - name: Run bat
+        shell: cmd
+        run: |
+          cd /d %CUSTOM_WORKSPACE_PATH%
+          media-autobuild_suite.bat
+
+      - name: Upload packages
+        uses: actions/upload-artifact@master
+        if: ${{ success() }}
+        with:
+          name: bin
+          path: ${{ env.CUSTOM_WORKSPACE_PATH }}/local64
+          if-no-files-found: error
